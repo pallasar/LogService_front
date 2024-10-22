@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import GridElement from './GridElement';
 
 const Accesses = () => {
@@ -13,13 +13,20 @@ const Accesses = () => {
   const [addressSearchField, setAddressSearchField] = useState('');
   const [countSearchFieldData, setCountSearchFieldData] = useState(0);
 
+  const refController = useRef(null);
+
   const handleClick = () => {
+    setData([]);
     setSuccessAccesses(!successAccesses);
 }
 
-  let controller = new AbortController();
-
   const fetchData = async () => {
+
+    if (refController.current) {
+      refController.current.abort();
+    }
+
+    refController.current = new AbortController();
 
     const countSearchField = countSearchFieldData > 0 
       ? countSearchFieldData 
@@ -40,7 +47,7 @@ const Accesses = () => {
         : process.env.REACT_APP_ALLACCESSES_URL;
 
       const response = await axios.post(url, requestBody, {
-        signal: controller.signal,
+        signal: refController.current.signal,
         headers: {
           'Content-Type': 'application/json',
         },
@@ -53,14 +60,17 @@ const Accesses = () => {
   };
 
   useEffect(() => {
-    return () => controller?.abort();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    return () => {
+      if (refController.current) {
+        refController.current.abort();
+      }
+    };
   }, []);
 
     return (
       <div>
         <h1>{successAccesses ? 'Success Accesses' : 'All Accesses'}</h1>
-        <button onClick={handleClick}>Toggle</button>
+        <button onClick={handleClick}>Switch</button>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <div>
                 <input

@@ -2,7 +2,7 @@ const GridElement = ({ addressName, accessesCount }) => {
 
   return (
     <>
-      <li style={{ textAlign: 'left'  }}>
+      <li style={{ textAlign: 'left' }}>
         {`${addressName}`}
       </li>
       <li>
